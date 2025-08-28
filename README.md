@@ -67,236 +67,14 @@ A hands‑on, bite‑size path to get comfortable with Git (including amend, int
 
 # 🧪 Git Missions
 
-## 0) Setup (once)
-
-```bash
-# Configure identity
-git config --global user.name "Your Name"
-git config --global user.email "you@example.com"
-
-# Create repo
-mkdir git-docker-onboarding && cd $_
-git init
-
-echo "Hello Git" > notes.txt
-git add notes.txt
-git commit -m "chore: initial commit"
-```
-
-✅ **Checkpoint**: `git log --oneline` shows one commit.
-
----
-
-## 1) Commits: small & atomic
-
-**Mission:** make 3 small commits.
-
-```bash
-echo "Line A" >> notes.txt
-git add notes.txt
-git commit -m "feat: add line A"
-
-echo "Line B" >> notes.txt
-git add notes.txt
-git commit -m "feat: add line B"
-
-echo "Fix typo" >> notes.txt
-git add notes.txt
-git commit -m "fix: add typo fix"
-```
-
-💡 *Rule of thumb:* 1 logical change = 1 commit.
-
----
-
-## 2) Amend: fix the **last** commit
-
-**Mission:** you forgot a file in the last commit; amend it.
-
-```bash
-echo "Forgotten" > forgotten.txt
-git add forgotten.txt
-git commit --amend -m "fix: add typo fix + forgotten file"
-```
-
-⚠️ Amending **rewrites** the last commit hash. Avoid on shared branches.
-
----
-
-## 3) Branching: merge vs rebase
-
-**Mission:** create a feature branch, diverge, then combine.
-
-```bash
-# branch off main
-git checkout -b feature/wave
-
-echo "\nWave 1" >> notes.txt
-git commit -am "feat: wave 1 changes"
-
-# switch back and diverge on main
-git checkout main
-echo "\nMain hotfix" >> notes.txt
-git commit -am "fix: main hotfix"
-
-# merge option
-git checkout feature/wave
-git merge main      # creates a merge commit (keeps history shape)
-
-# alternatively, rebase option
-# git rebase main   # replays your commits on top of main (linear history)
-```
-
-**When to merge?** shared branches, preserve context.
-**When to rebase?** your own feature branch for linear history.
-
----
-
-## 4) Interactive rebase: clean up history
-
-**Mission:** squash two noisy commits into one.
-
-```bash
-# open an interactive editor for the last 3 commits
-git rebase -i HEAD~3
-# mark some commits as `squash` or `fixup`, save & quit
-```
-
-After success: `git log --oneline` shows fewer, cleaner commits.
-
----
-
-## 5) Cherry‑pick: surgical copy
-
-**Mission:** copy a specific commit from `feature/wave` onto `main`.
-
-```bash
-# find the commit hash on feature branch
-git log --oneline feature/wave
-# copy just that commit onto main
-git checkout main
-git cherry-pick <hash>
-```
-
-Use when you need **one** change without merging the whole branch.
-
----
-
-## 6) GitHub PR flow
-
-1. Create remote & push:
-
-```bash
-git remote add origin git@github.com:<you>/git-docker-onboarding.git
-git push -u origin main
-```
-
-2. Create a new feature branch, push it, then open a PR on GitHub UI.
-3. Request review, address comments, and **merge via squash** to keep main tidy.
+Go to ./git/
 
 ---
 
 # 🐳 Docker Missions
 
-### App used in exercises
+Go to ./docker/
 
-A tiny Flask app: responds with hostname and a counter.
-
-#### `docker/app/app.py`
-
-```python
-from flask import Flask
-import os
-app = Flask(__name__)
-
-@app.route("/")
-def hello():
-    host = os.uname().nodename if hasattr(os, "uname") else os.getenv("HOSTNAME", "unknown")
-    return f"Hello from {host}!"
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
-```
-
-#### `docker/app/requirements.txt`
-
-```
-flask==3.0.3
-```
-
-#### `.dockerignore`
-
-```
-__pycache__
-*.pyc
-*.log
-.env
-```
-
-#### `docker/app/Dockerfile`
-
-```Dockerfile
-# syntax=docker/dockerfile:1
-FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-EXPOSE 5000
-CMD ["python", "app.py"]
-```
-
-### 7) Build & run a container
-
-```bash
-cd docker/app
-# build image
-docker build -t hello-flask:dev .
-# list images
-docker images | head
-# run container
-docker run --rm -p 5000:5000 --name hello hello-flask:dev
-# open http://localhost:5000
-```
-
-Common ops:
-
-```bash
-# new shell, stop the container
-docker stop hello
-# see past containers/images
-docker ps -a; docker images
-```
-
----
-
-### 8) docker‑compose: services & volumes
-
-#### `docker/app/docker-compose.yml`
-
-```yaml
-services:
-  web:
-    build: .
-    ports:
-      - "5000:5000"
-    volumes:
-      - .:/app:delegated
-    environment:
-      - FLASK_ENV=development
-```
-
-Run:
-
-```bash
-docker compose up --build
-# open another shell to tail logs or exec into container
-# docker compose logs -f
-# docker compose exec web sh
-# docker compose down
-```
-
-**Exercise:** Add a second service named `worker` running the same image printing a message every 5s (hint: use `command:` override).
 
 ---
 
@@ -372,6 +150,9 @@ jobs:
 # Git graph view
 git log --oneline --graph --decorate --all
 
+# Amend last commit
+git commit --amend
+
 # Reword last commit message only
 git commit --amend -m "<new message>"
 
@@ -383,12 +164,216 @@ git add -A && git rebase --continue
 
 # Create and switch branch
 git switch -c feature/x
+
+# Commit
+git add . && git commit -m "msg"
+
+# Merge branch into main
+git checkout main && git merge feature/x
+
+# Rebase branch onto main
+git checkout feature/x && git rebase main
+
+# Interactive rebase (last N commits)
+git rebase -i HEAD~N
+
+# Cherry-pick commit
+git cherry-pick <hash>
+
+# View commit graph
+git log --oneline --graph --decorate --all
+```
+
+## 🔹 Docker
+
+```bash
+# Build image
+docker build -t myapp:dev .
+
+# Run container
+docker run --rm -p 5000:5000 myapp:dev
+
+# List containers
+docker ps -a
+
+# Stop container
+docker stop <name>
+
+# Compose up
+docker compose up --build
+
+# Compose down
+docker compose down
+
+# Logs
+docker compose logs -f
+
+# Exec into container shell
+docker compose exec web sh
 ```
 
 ---
 
-## 🙌 What next?
+## 🏎️ Final Task — Formula Student Integration
 
-* Copy these files into a fresh repo and start missions.
-* Push to GitHub and open a PR titled: `feat: complete onboarding missions`.
-* Want this as a ready‑to‑download ZIP or a pre‑initialized GitHub repo? Let me know and I’ll generate it with the file layout above.
+**Scenario:** You are working in the Formula Student Autonomous Racing team. The control team created a small Flask telemetry app (`app.py`) that streams vehicle speed and cone positions. You need to prepare it for collaboration and deployment.
+
+### Your mission:
+
+1. **Git (collaboration)**
+
+   * Create a feature branch `feature/telemetry_{your_name}`.
+   * Add a new route `/status` to the Flask app returning `{ "status": "ok" }`.
+   * Commit changes with a clear message.
+   * Amend the commit to also include an update to `requirements.txt`.
+   * Rebase your branch on top of `main`.
+   * Squash commits with interactive rebase.
+   * Push to GitHub and open a Pull Request.
+
+2. **Git (advanced)**
+
+   * From feature/planner branch, cherry‑pick just the `important_bugfix` commit onto `feature/telemetry_{your_name}`.
+
+3. **Docker (deployment)**
+
+   * Write a Dockerfile to containerize the telemetry app.
+   * Build and run the container on port 5000.
+   * Add a second service with `docker-compose.yml` called `logger` that prints "🏎️ logging telemetry..." every 5s.
+   * Run both services with `docker compose up`.
+
+✅ **Completion:** Submit the GitHub PR link and show both containers running locally via `docker compose ps`. This proves you mastered commits, amend, rebase, cherry‑pick, PRs, Dockerfile, and docker‑compose — all in a Formula Student context.
+
+---
+
+## 🧩 Starter Files (copy into `docker/app/`)
+
+### `app.py`
+
+```python
+from flask import Flask, jsonify
+import os
+
+app = Flask(__name__)
+
+# --- Mock telemetry (replace with real data wiring) ---
+STATE = {
+    "speed_mps": 12.3,
+    "cones": [
+        {"x": 3.2, "y": 1.1, "color": "blue"},
+        {"x": 6.8, "y": -0.7, "color": "yellow"},
+    ],
+}
+
+@app.get("/")
+def index():
+    host = os.getenv("HOSTNAME", "unknown")
+    return f"FS Telemetry running on {host}"
+
+@app.get("/telemetry")
+def telemetry():
+    return jsonify(STATE)
+
+@app.get("/status")
+def status():
+    return jsonify({"status": "ok"})
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
+```
+
+### `requirements.txt`
+
+```
+flask==3.0.3
+```
+
+### `.dockerignore`
+
+```
+__pycache__
+*.pyc
+*.log
+.env
+.git
+```
+
+### `Dockerfile`
+
+```Dockerfile
+# syntax=docker/dockerfile:1
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt \
+    && adduser --disabled-password --gecos "" appuser \
+    && chown -R appuser:appuser /app
+COPY . .
+USER appuser
+EXPOSE 5000
+CMD ["python", "app.py"]
+```
+
+### `logger.py`
+
+```python
+import time
+import os
+
+if __name__ == "__main__":
+    while True:
+        print("🏎️ logging telemetry...", os.getenv("SERVICE_NAME", "logger"))
+        time.sleep(5)
+```
+
+### `docker-compose.yml`
+
+```yaml
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+    restart: unless-stopped
+
+  logger:
+    build: .
+    command: ["python", "logger.py"]
+    environment:
+      - SERVICE_NAME=telemetry-logger
+    restart: unless-stopped
+```
+
+### Quick run
+
+```bash
+cd docker/app
+# build images and start both services
+docker compose up --build
+# then open http://localhost:5000 and http://localhost:5000/telemetry
+```
+
+### Suggested Git steps (apply in repo root)
+
+```bash
+# create feature branch and commit starter files
+git switch -c feature/telemetry_{your_name}
+# (copy files above into docker/app/)
+git add docker/app
+git commit -m "feat(telemetry): add Flask app, Dockerfile and compose"
+
+# amend to include a small fix
+echo "# dev note" >> docker/app/README.md || true
+git add docker/app/README.md
+git commit --amend -m "feat(telemetry): add app + Docker + compose (with README)"
+
+# rebase on main & squash later if needed
+git fetch origin || true
+git rebase origin/main || true
+
+# push and open PR
+git push -u origin feature/telemetry
+```
+
+> Replace the mock `STATE` with real speed/cone data when integrating with your simulator or ROS bridge.
