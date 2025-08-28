@@ -25,6 +25,11 @@ A hands‑on, bite‑size path to get comfortable with Git (including amend, int
 ```
 .
 ├── README.md                        # you are here
+├── self-assessment.md               # knowledge check & challenges
+├── Makefile                         # common commands  
+├── .gitignore                       # standard ignore patterns
+├── scripts/
+│   └── check-setup.sh              # prerequisite verification
 ├── git/                             # Git missions
 │   ├── 01-setup.md
 │   ├── 02-commits.md
@@ -54,14 +59,18 @@ A hands‑on, bite‑size path to get comfortable with Git (including amend, int
 
 ## 🗺️ Learning Path (90–120 min)
 
+**🔧 Start here:** `make setup` or `./scripts/check-setup.sh`
+
 1. **Git basics → commits** (15m)
-2. **Amend mistakes** (10m)
+2. **Amend mistakes** (10m)  
 3. **Branching: merge vs rebase** (20m)
 4. **Interactive rebase (clean history)** (20m)
 5. **Cherry‑pick (surgical copy)** (10m)
 6. **Open a Pull Request (PR) on GitHub** (10m)
 7. **Dockerfile → build/run** (15m)
 8. **docker‑compose: services, ports, volumes** (15m)
+
+**🎯 Finish with:** Self-assessment (`self-assessment.md`)
 
 ---
 

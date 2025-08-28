@@ -20,4 +20,20 @@ docker stop hello
 docker ps -a; docker images
 ```
 
+**Verification:**
+```bash
+# Check if container is running
+docker ps | grep hello-flask
+# Should show running container
+
+# Test the application
+curl http://localhost:5000
+# Should return "Hello from <container-name>!"
+```
+
+**🚨 Troubleshooting:**
+- **Port already in use** → Use different port: `docker run -p 5001:5000 ...`
+- **Container won't start** → Check logs: `docker logs hello`
+- **Can't connect to localhost:5000** → Verify port mapping with `docker ps`
+
 ---

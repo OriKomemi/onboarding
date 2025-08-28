@@ -9,11 +9,11 @@ git add . && git commit -m "msg"
 # Amend last commit
 git commit --amend
 
-# Create brnch
+# Create branch
 git checkout -b feature/x
 
-# switch branch
-git checkout
+# Switch branch
+git checkout main
 
 # Merge branch into main
 git checkout main && git merge feature/x
