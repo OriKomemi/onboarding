@@ -63,25 +63,32 @@ jobs:
       - name: Test Docker image
         run: |
           echo "🧪 Testing Docker image..."
+          
           # Start container in background
           docker run -d --name test-container -p 5000:5000 hello-flask:ci
           
           # Wait for container to start
           sleep 10
           
-          # Test if container is running and responding
+          # Test if container is running
           if docker ps | grep -q test-container; then
             echo "✅ Container is running"
-            # Test health endpoint (optional)
-            docker exec test-container python -c "
-import urllib.request
-try:
-    response = urllib.request.urlopen('http://localhost:5000/', timeout=5)
-    print('✅ Health check passed:', response.getcode())
-except Exception as e:
-    print('⚠️ Health check failed:', str(e))
-    exit(1)
-"
+            
+            # Create a test script file
+            cat > health_check.py << 'EOF'
+          import urllib.request
+          try:
+              response = urllib.request.urlopen('http://localhost:5000/', timeout=5)
+              print('✅ Health check passed:', response.getcode())
+          except Exception as e:
+              print('⚠️ Health check failed:', str(e))
+              exit(1)
+          EOF
+            
+            # Run health check inside container
+            docker cp health_check.py test-container:/tmp/health_check.py
+            docker exec test-container python /tmp/health_check.py
+            
           else
             echo "❌ Container failed to start"
             docker logs test-container
