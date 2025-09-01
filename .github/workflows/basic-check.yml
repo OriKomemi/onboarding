@@ -1,19 +1,93 @@
 name: basic-check
 on: [push, pull_request]
+
 jobs:
-  build:
+  lint:
+    name: Lint Python Code
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Lint
+          
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            
+      - name: Install linting tools
         run: |
+          python -m pip install --upgrade pip
           pip install ruff
-          ruff --version
-      - name: Build container
+          
+      - name: Lint Python files
         run: |
-          docker --version
-          docker build -t hello-flask:ci ./docker/app
+          # Only run ruff if Python files exist
+          if [ -d "docker/app" ] && [ -f "docker/app/app.py" ]; then
+            echo "🔍 Linting Python files..."
+            ruff check docker/app/ --select E,W,F --ignore E501
+            echo "✅ Linting completed successfully"
+          else
+            echo "⚠️ No Python files found to lint"
+          fi
+
+  docker-build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Build Docker image
+        run: |
+          if [ -f "docker/app/Dockerfile" ]; then
+            echo "🐳 Building Docker image..."
+            docker build -t hello-flask:ci ./docker/app
+            echo "✅ Docker build completed successfully"
+          else
+            echo "❌ Dockerfile not found"
+            exit 1
+          fi
+          
+      - name: Test Docker image
+        run: |
+          echo "🧪 Testing Docker image..."
+          # Start container in background
+          docker run -d --name test-container -p 5000:5000 hello-flask:ci
+          
+          # Wait for container to start
+          sleep 10
+          
+          # Test if container is running and responding
+          if docker ps | grep -q test-container; then
+            echo "✅ Container is running"
+            # Test health endpoint (optional)
+            docker exec test-container python -c "
+import urllib.request
+try:
+    response = urllib.request.urlopen('http://localhost:5000/', timeout=5)
+    print('✅ Health check passed:', response.getcode())
+except Exception as e:
+    print('⚠️ Health check failed:', str(e))
+    exit(1)
+"
+          else
+            echo "❌ Container failed to start"
+            docker logs test-container
+            exit 1
+          fi
+          
+          # Cleanup
+          docker stop test-container
+          docker rm test-container

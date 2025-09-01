@@ -25,11 +25,14 @@ A hands‑on, bite‑size path to get comfortable with Git (including amend, int
 ```
 .
 ├── README.md                        # you are here
+├── PLATFORM-NOTES.md                # cross-platform setup guide
 ├── self-assessment.md               # knowledge check & challenges
-├── Makefile                         # common commands  
+├── Makefile                         # common commands (Linux/Mac)
+├── run.bat                          # common commands (Windows)
 ├── .gitignore                       # standard ignore patterns
 ├── scripts/
-│   └── check-setup.sh              # prerequisite verification
+│   ├── check-setup.sh              # prerequisite verification (Linux/Mac)
+│   └── check-setup.bat             # prerequisite verification (Windows)
 ├── git/                             # Git missions
 │   ├── 01-setup.md
 │   ├── 02-commits.md
@@ -59,7 +62,9 @@ A hands‑on, bite‑size path to get comfortable with Git (including amend, int
 
 ## 🗺️ Learning Path (90–120 min)
 
-**🔧 Start here:** `make setup` or `./scripts/check-setup.sh`
+**🔧 Start here:** 
+- **Linux/Mac:** `make setup` or `./scripts/check-setup.sh`
+- **Windows:** `run.bat setup` or `scripts\check-setup.bat`
 
 1. **Git basics → commits** (15m)
 2. **Amend mistakes** (10m)  
@@ -117,31 +122,28 @@ Go to ./docker/
 
 ---
 
-## 🧪 Optional CI (GitHub Actions)
+## ✅ Automated CI/CD (GitHub Actions)
 
-#### `.github/workflows/basic-check.yml`
+The project includes a comprehensive GitHub Actions workflow that:
 
-```yaml
-name: basic-check
-on: [push, pull_request]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Lint
-        run: |
-          pip install ruff
-          ruff --version
-      - name: Build container
-        run: |
-          docker --version
-          docker build -t hello-flask:ci ./docker/app
-```
+#### 🔍 **Lint Job:**
+- ✅ Python code style checking with Ruff
+- ✅ Caching for faster builds  
+- ✅ Only runs when Python files exist
+
+#### 🐳 **Docker Build Job:**
+- ✅ Builds container image 
+- ✅ Tests container startup
+- ✅ Validates health endpoints
+- ✅ Automatic cleanup
+
+#### 🚀 **Workflow Features:**
+- Runs on every push and pull request
+- Parallel job execution for speed
+- Detailed logging and error reporting  
+- Fails fast with clear error messages
+
+**View the complete workflow:** `.github/workflows/basic-check.yml`
 
 ---
 

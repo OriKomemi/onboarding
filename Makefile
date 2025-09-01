@@ -50,4 +50,4 @@ git-status: ## Show git status with graph
 # Formula Student specific
 fs-setup: ## Setup Formula Student telemetry environment
 	@echo "🏎️  Setting up Formula Student telemetry..."
-	@cd docker/app && docker compose -f docker-compose.yml up --build
+	@cd docker/app && docker compose up --build

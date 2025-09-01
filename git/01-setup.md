@@ -1,18 +1,46 @@
-## 0) Setup (once)
+## 1) Git Setup & First Repository
 
+**🎯 Goal:** Set up Git with your identity and create your first repository
+
+### Step 1: Configure Your Identity
 ```bash
-# Configure identity
+# Set your name (replace with your actual name)
 git config --global user.name "Your Name"
+
+# Set your email (use your real email)
 git config --global user.email "you@example.com"
+```
 
-# Create repo
-mkdir git-docker-onboarding && cd $_
+💡 **Why this matters:** Every Git commit includes author information. This helps teammates know who made what changes.
+
+### Step 2: Create Your Practice Repository
+```bash
+# Create a new directory for practice
+mkdir git-docker-onboarding
+
+# Enter the directory
+cd git-docker-onboarding
+
+# Initialize Git repository (creates hidden .git folder)
 git init
+```
 
+### Step 3: Make Your First Commit
+```bash
+# Create a simple text file
 echo "Hello Git" > notes.txt
+
+# Stage the file (prepare it for commit)
 git add notes.txt
+
+# Create your first commit with a message
 git commit -m "chore: initial commit"
 ```
+
+**🔍 What just happened?**
+1. `git add` moved your file to the "staging area" 
+2. `git commit` permanently saved the staged changes
+3. The message describes what you did
 
 ✅ **Checkpoint**: `git log --oneline` shows one commit.
 
